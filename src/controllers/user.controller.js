@@ -81,7 +81,7 @@ const logout = (req, res, next) => {
 const getUser = async (request, response, next) => {
   try {
     const id = request.params.id;
-    const user = await User.findById(id).populate("estaciones");
+    const user = await User.findById(id);
     response.status(200).json({
         status: 200,
         message: HTTPSTATUSCODE[200],
@@ -97,7 +97,7 @@ const getUser = async (request, response, next) => {
 
 const getUsers = async (request, response, next) => {
     try {
-        const users = await User.find().populate("estaciones");
+        const users = await User.find();
         response.status(200).json({
             status: 200,
             message: HTTPSTATUSCODE[200],
@@ -114,5 +114,5 @@ module.exports = {
   createUser,
   authenticate,
   logout,
-  addstation,
+
 };
