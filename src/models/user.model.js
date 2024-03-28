@@ -1,20 +1,11 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const salt = 10; // complejidad del encriptado
+const {model, Schema} = require ('mongoose');
 
-const userSchema = new mongoose.Schema(
-    {
-        name: { type: String, unique: true, trim: true, required: true },
-        password: { type: String, trim: true, required: true }
-    }
-);
+const userSchema = new Schema ({
+    username: String, 
+    name: String,
+    email: String, 
+    password: String,
+    image: String,
+})
 
-userSchema.pre("save", (next) => {
-    if (this.password) {
-        this.password = bcrypt.hashSync(this.password, salt);
-    }
-    next();
-});
-
-const User = mongoose.model("users", userSchema);
-module.exports = User;
+module.exports = model ('user', userSchema);

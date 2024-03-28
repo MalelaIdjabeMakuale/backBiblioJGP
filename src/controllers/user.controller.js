@@ -2,117 +2,77 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const HTTPSTATUSCODE = require("../../utils/httpStatusCode");
-const { request } = require("express");
 
-const createUser = async (request, response, next) => {
-  try {
-    const user =  new User(request.body);
+const createUser = async (req, res, next) => {
+    try {
+        const user = new User(req.body);
+        const saltRounds = 10;
+        user.password = await bcrypt.hash(req.body.password, saltRounds);
 
-    // Hash de la contraseña antes de guardarla en la base de datos
-    const saltRounds = 10;  // Número de rondas para generar el salt
-    user.password = await bcrypt.hash(request.body.password, saltRounds);
+        if (await User.findOne({ email: req.body.email })) {
+            return res.status(409).json({
+                status: 409,
+                message: HTTPSTATUSCODE[409],
+                data: null
+            });
+        }
 
-    // Verificar si ya existe el usuario
-    if (await User.findOne({ name: request.body.name })) {
-      return response.status(409).json({
-        status: 409,
-        message: HTTPSTATUSCODE[409],
-        data: null
-      });
+        const userDb = await user.save();
+        
+        return res.status(201).json({
+            status: 201,
+            message: HTTPSTATUSCODE[201],
+            data: null
+        });
+    } catch (error) {
+        next(error);
     }
-
-    // Guardar el usuario en la base de datos
-    const userDb = await user.save();
-    
-    return response.status(201).json({
-      status: 201,
-      message: HTTPSTATUSCODE[201],
-      data: null
-    });
-  } catch (error) {
-    next(error);
-  }
 };
 
-
-
 const authenticate = async (req, res, next) => {
-  try {
-    const userInfo = await User.findOne({ name: req.body.name });
-    if (userInfo && bcrypt.compareSync(req.body.password, userInfo.password)) {
-      userInfo.password = null;
-      const token = jwt.sign(
-        {
-          id: userInfo._id,
-          name: userInfo.name,
-        },
-        req.app.get("secretKey"),
-        { expiresIn: "1d" }
-      );
-
-      return res.json({
-        status: 200,
-        message: HTTPSTATUSCODE[200],
-        data: { user: userInfo, token: token },
-      });
-    } else {
-      return res.json({
-        status: 400,
-        message: HTTPSTATUSCODE[400],
-        data: null,
-      });
+    try {
+        const userInfo = await User.findOne({ email: req.body.email }); 
+        if (userInfo && bcrypt.compareSync(req.body.password, userInfo.password)) {
+            userInfo.password = null;
+            const token = jwt.sign(
+                {
+                    id: userInfo._id,
+                    email: userInfo.email,
+                },
+                req.app.get("secretKey"),
+                { expiresIn: "1d" }
+            );
+            return res.json({
+                status: 200,
+                message: HTTPSTATUSCODE[200],
+                data: { user: userInfo, token: token },
+            });
+        } else {
+            return res.json({
+                status: 400,
+                message: HTTPSTATUSCODE[400],
+                data: null,
+            });
+        }
+    } catch (error) {
+        return next(error);
     }
-  } catch (error) {
-    return next(error);
-  }
 };
 
 const logout = (req, res, next) => {
-  try {
-    return res.json({
-      status: 200,
-      message: HTTPSTATUSCODE[200],
-      token: null,
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
-const getUser = async (request, response, next) => {
-  try {
-    const id = request.params.id;
-    const user = await User.findById(id);
-    response.status(200).json({
-        status: 200,
-        message: HTTPSTATUSCODE[200],
-        data: user
-    });
-
-} catch (error) {
-    next(error)
-}
-}
-
-
-
-const getUsers = async (request, response, next) => {
     try {
-        const users = await User.find();
-        response.status(200).json({
+        return res.json({
             status: 200,
             message: HTTPSTATUSCODE[200],
-            data: users
+            token: null,
         });
- 
     } catch (error) {
-        next(error)
+        return next(error);
     }
-}
-module.exports = {
-  getUser,
-    getUsers,
-  createUser,
-  authenticate,
-  logout,
+};
 
+module.exports = {
+    createUser,
+    authenticate,
+    logout
 };
