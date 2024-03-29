@@ -71,8 +71,45 @@ const logout = (req, res, next) => {
     }
 };
 
+const getUser = async (req, res, next) => {
+    try {
+        const users = await User.find();
+        res.json({
+            status: 200,
+            message: HTTPSTATUSCODE[200],
+            data: users
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getUserById = async (req, res, next) => {
+    try {
+        const userId = req.params.userId;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: HTTPSTATUSCODE[404],
+                data: null
+            });
+        }
+        res.json({
+            status: 200,
+            message: HTTPSTATUSCODE[200],
+            data: user
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 module.exports = {
     createUser,
     authenticate,
-    logout
+    logout,
+    getUser,
+    getUserById
 };
