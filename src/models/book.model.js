@@ -9,7 +9,6 @@ const bookSchema = new mongoose.Schema({
     match: /^[0-9a-zA-Zàáéíóúñâêîôăûãñõçäöü.,\-_ ]+$/,
   },
 
-
   author: {
     type: String,
     required: true,
@@ -25,7 +24,7 @@ const bookSchema = new mongoose.Schema({
     lowercase: true,
     match: /^[a-zA-Zàáéíóúñâêîñôûãõçäöăü.,\-_ ]+$/,
   },
-  
+
   publisher: {
     type: String,
     required: true,
@@ -41,7 +40,6 @@ const bookSchema = new mongoose.Schema({
     lowercase: true,
     match: /^[a-zA-Zàáéíóúñăâêîñôûãõçäöü.,\-_ ]+$/,
   },
-
 
   language: {
     type: String,
@@ -66,12 +64,11 @@ const bookSchema = new mongoose.Schema({
     default: false,
   },
 
-
   borrowedBy: { type: String },
 
   borrowedTo: { type: String },
 
-  cover: {type:String}
+  cover: { type: String },
 });
 
 const Book = mongoose.model("Book", bookSchema);
