@@ -14,11 +14,7 @@ const app = express();
 
 
 app.use(
-  cors({
-    // Permitir acceso desde cualquier origen
-    origin: "*",
-    credentials: true,
-  })
+  cors()
 );
 
 app.use(express.json());
